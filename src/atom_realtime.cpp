@@ -1,3 +1,5 @@
+#define NOMINMAX
+#include <windows.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <GL/glu.h>
@@ -15,6 +17,8 @@
 #include <fstream>
 #include <complex>
 #include <random>
+#define NOMINMAX
+#include <windows.h>
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -295,7 +299,7 @@ struct Camera {
     double lastX = 0.0, lastY = 0.0;
 
     vec3 position() const {
-        float clampedElevation = clamp(elevation, 0.01f, float(M_PI) - 0.01f);
+        float clampedElevation = std::clamp(elevation, 0.01f, float(M_PI) - 0.01f);
         return vec3(
             radius * sin(clampedElevation) * cos(azimuth),
             radius * cos(clampedElevation),
@@ -312,7 +316,7 @@ struct Camera {
         if (dragging) {
             azimuth += dx * orbitSpeed;
             elevation -= dy * orbitSpeed;
-            elevation = glm::clamp(elevation, 0.01f, float(M_PI) - 0.01f);
+            elevation = std::clamp(elevation, 0.01f, float(M_PI) - 0.01f);
         }
         lastX = x;
         lastY = y;

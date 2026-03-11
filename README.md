@@ -22,14 +22,14 @@ What the model does:
 ## **Build Instructions:**
 
 1. Clone the repository:
-	-  `git clone https://github.com/kavan010/Atoms.git`
+	-  `git clone https://github.com/AbdoWldFiad/QuantumAtomSimulator.git`
 2. CD into the newly cloned directory
 	- `cd ./Atoms` 
 3. Install dependencies with Vcpkg
-	- `vcpkg install`
+	- `vcpkg install glew glfw3 glm`
 4. Get the vcpkg cmake toolchain file path
 	- `vcpkg integrate install`
-	- This will output something like : `CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake"`
+	- This will output something like : `CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/Your/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake"`
 5. Create a build directory
 	- `mkdir build`
 6. Configure project with CMake
@@ -38,9 +38,11 @@ What the model does:
 7. Build the project
 	- `cmake --build build`
 8. Run the program
-	- The executables will be located in the build folder
+	- The executables will be located in the build/Release 
 
 ### Alternative: Debian/Ubuntu apt workaround
+
+> this is from the original [repo](https://github.com/kavan010/Atoms.git) and i did not test it myself
 
 If you don't want to use vcpkg, or you just need a quick way to install the native development packages on Debian/Ubuntu, install these packages and then run the normal CMake steps above:
 
