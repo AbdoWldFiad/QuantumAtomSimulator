@@ -28,16 +28,16 @@ const double m_e = 1;
 const double zmSpeed = 10.0;
 
 // --- orbital stats ---
-int N = 100000;
+int N = 100;
 float LightingScaler = 700;
 float n = 3; float l = 1; float m = 1;
 
 
 // ================= Physics Sampling ================= //
 struct Particle {
-    vec3 pos;
-    vec3 vel = vec3(0.0f);
-    vec4 color;
+    vec3 pos;                    //3D location
+    vec3 vel = vec3(0.0f);       //motion (from quantum probability flow)
+    vec4 color;                  //based on probability density
     Particle(vec3 p, vec4 c = vec4(0.0f, 0.5f, 1.0f, 1.0f)) : pos(p), color(c){}
 };
 vector<Particle> particles;
@@ -82,7 +82,7 @@ double sampleR(int n, int l, mt19937& gen) {
             double norm = pow(2.0 / (n * a0), 3) * tgamma(n - l) / (2.0 * n * tgamma(n + l + 1));
             double R = sqrt(norm) * exp(-rho / 2.0) * pow(rho, l) * L;
 
-            double pdf = r * r * R * R;
+            double pdf = r * r * R * R;  //This ensures particles appear where the electron is likely to be.
             sum += pdf;
             cdf[i] = sum;
         }
@@ -162,7 +162,8 @@ float samplePhi(float n, float l, float m) {
     return 2.0f * M_PI * dis(gen);
 }
 // --- calculate prob current ---
-vec3 calculateProbabilityFlow(Particle& p, int n, int l, int m) {
+    //This simulates probability current : Particles rotate around the z-axis & Speed depends on 'm'
+vec3 calculateProbabilityFlow(Particle& p, int n, int l, int m) {  
     double r = length(p.pos);   if (r < 1e-6) return vec3(0.0f);
     double theta = acos(p.pos.y / r); 
     double phi = atan2(p.pos.z, p.pos.x); 
@@ -362,6 +363,9 @@ vec4 inferno(double r, double theta, double phi, int n, int l, int m) {
 
 // ================= Raytracer ================= //
 struct Sphere { vec4 center_radius;  vec4 color; };
+//Each particle becomes a ray-traced sphere:
+//      xyz → position
+//      w → radius
 
 struct Camera {
     vec3 target = vec3(0.0f, 0.0f, 0.0f);
@@ -428,9 +432,12 @@ void generateParticles(int N) {
     for (int i = 0; i < N; ++i) {
         // --- get x, y, z, positions
         vec3 pos = sphericalToCartesian(
-            sampleR(n, l, gen), 
-            sampleTheta(l, m, gen), 
-            samplePhi(n, l, m)
+            sampleR(n, l, gen), //Builds a CDF (cumulative distribution function) once, Then samples using inverse transform sampling
+            sampleTheta(l, m, gen), // P(θ)=sinθ⋅∣Plm​(cosθ)∣2 , plm = associated Legendre polynomial
+            samplePhi(n, l, m) // Uniform because probability is symmetric in φ for magnitude.
+        
+            // all this gets a correct spatial distribution of electron probability.
+        
         );
         // --- color & add particle ---
         float r = length(pos);
@@ -767,7 +774,7 @@ int main () {
             double r = length(p.pos);
             if (r > 1e-6) {
                 double theta = acos(p.pos.y / r);
-                p.vel = calculateProbabilityFlow(p, n, l, m);
+                p.vel = calculateProbabilityFlow(p, n, l, m);  
                 vec3 temp_pos = p.pos + p.vel * dt;
                 double new_phi = atan2(temp_pos.z, temp_pos.x);
                 p.pos = engine.sphericalToCartesian(r, theta, new_phi);
