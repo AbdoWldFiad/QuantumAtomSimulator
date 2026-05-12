@@ -1,1 +1,4 @@
 /build
+build_and_run.sh
+# keeping is just in case i needed it 
+atom_raytracer.cpp 
